@@ -3,72 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warga Bulanan RT 04 RW 01</title>
+<title>LAPORAN WARGA BULANAN RT 04 RW 01</title>
 <style>
-body { font-family:'Segoe UI',sans-serif; background:#0f0f0f; color:#f1f1f1; margin:0; padding:10px; }
-h1 { text-align:center; color:#00ff88; margin-bottom:10px; font-size:1.2rem; }
-.filter-container { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin-bottom:10px; font-size:0.8rem; }
-.filter-container input, .filter-container button { background:#1a1a1a; border:1px solid #444; color:#fff; padding:5px 6px; border-radius:5px; font-size:0.8rem; }
+body { font-family:'Segoe UI',sans-serif; background:#0f0f0f; color:#f1f1f1; margin:0; padding:15px; }
+h1 { text-align:center; color:#00ff88; margin-bottom:15px; font-size:1.5rem; }
+.filter-container { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin-bottom:15px; }
+.filter-container input, .filter-container button { background:#1a1a1a; border:1px solid #444; color:#fff; padding:6px 8px; border-radius:6px; font-size:0.9rem; }
 .filter-container button { background:#00cc66; color:#000; font-weight:bold; cursor:pointer; transition:0.2s; }
 .filter-container button:hover { background:#00ff88; }
-.table-wrapper { overflow-x:auto; -webkit-overflow-scrolling: touch; margin-bottom:10px; }
-table { width:100%; border-collapse:collapse; min-width:400px; font-size:0.75rem; background:#1a1a1a; }
-thead th { position: sticky; top:0; background:#00cc66; color:#000; padding:6px 5px; }
-th, td { padding:5px 6px; text-align:center; border-bottom:1px solid #333; word-break:break-word; }
+.table-wrapper { overflow-x:auto; -webkit-overflow-scrolling: touch; }
+table { width:100%; border-collapse:collapse; background:#1a1a1a; min-width:700px; }
+th, td { padding:8px 10px; text-align:center; border-bottom:1px solid #333; font-size:0.85rem; }
+th { background-color:#00cc66; color:#000; }
 td.hasil { text-align:right; color:#00ff99; font-weight:bold; min-width:120px; }
-tr:nth-child(even){ background-color:#1e1e1e; }
-tr:hover{ background-color:#2a2a2a; }
-.pagination{ display:flex; justify-content:center; flex-wrap:wrap; gap:4px; margin-top:10px; font-size:0.75rem; }
-.pagination button{ padding:4px 6px; border-radius:4px; }
-.pagination button.active{ background:#00ff88; color:#000; transform:scale(1.05);}
-.pagination button:disabled{ background:#333; color:#777; cursor:not-allowed; }
-footer{ text-align:center; font-size:11px; color:#777; margin-top:15px; }
-@media(max-width:500px){
-  .filter-container input, .filter-container button{ width:100%; max-width:180px; margin-bottom:3px; }
-  table th, table td{ font-size:0.65rem; padding:3px 4px; }
-  h1{ font-size:1rem; }
-}
+tr:nth-child(even) { background-color:#1e1e1e; }
+tr:hover { background-color:#2a2a2a; }
+.highlight { background-color:#00ff44; color:#000; font-weight:bold; border-radius:3px; padding:0 2px; }
+.pagination { display:flex; justify-content:center; flex-wrap:wrap; gap:5px; margin-top:15px; }
+.pagination button { font-size:0.85rem; padding:5px 8px; border-radius:5px; }
+.pagination button.active { background:#00ff88; color:#000; transform:scale(1.1); }
+.pagination button:disabled { background:#333; color:#777; cursor:not-allowed; }
+footer { text-align:center; font-size:12px; color:#777; margin-top:20px; }
+@media(max-width:600px){ .filter-container input,.filter-container button{ width:100%; max-width:220px; } h1{ font-size:1.2rem; } table th,table td{ font-size:0.75rem; padding:6px 5px; } }
 </style>
 </head>
 <body>
 
-<h1>Warga Bulanan RT 04 RW 01</h1>
+<h1>LAPORAN WARGA BULANAN RT 04 RW 01</h1>
 
 <div class="filter-container">
   <label>Dari: <input type="date" id="startDate"></label>
   <label>Sampai: <input type="date" id="endDate"></label>
-  <input type="text" id="searchBox" placeholder="🔎 Cari semua kolom..." oninput="applyFilter()"/>
+  <input type="text" id="searchBox" placeholder="🔎 Cari semua kolom..." />
   <button onclick="resetFilter()">🔄 Reset</button>
   <button onclick="exportPDF()">📄 Export PDF</button>
 </div>
 
 <div class="table-wrapper">
-  <table>
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Tanggal</th>
-        <th>Nama Warga</th>
-        <th>Alamat</th>
-        <th>Jenis Iuran</th>
-        <th>Jumlah (Rp)</th>
-        <th>Keterangan</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <div class="pagination"></div>
+<table>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Tanggal</th>
+      <th>Nama Warga</th>
+      <th>Alamat</th>
+      <th>Jenis Iuran</th>
+      <th>Jumlah (Rp)</th>
+      <th>Keterangan</th>
+    </tr>
+  </thead>
+  <tbody id="table-body"><tr><td colspan="7">⏳ Memuat data...</td></tr></tbody>
+</table>
 </div>
 
+<div class="pagination" id="pagination"></div>
 <footer>Data otomatis diperbarui dari Google Sheet</footer>
 
-<!-- Library PapaParse -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
 
-let allData = [], filteredData = [], currentPage = 1, rowsPerPage = 10, currentKeyword = "";
+let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="";
 
 function parseTanggalIndo(tglStr){
   if(!tglStr) return null;
@@ -82,12 +78,12 @@ function parseTanggalIndo(tglStr){
   return new Date(year, month, day);
 }
 
-// Load CSV dengan PapaParse
+// Load CSV
 Papa.parse(sheetUrl, {
   download: true,
   header: true,
   skipEmptyLines: true,
-  complete: function(results) {
+  complete: function(results){
     allData = results.data.map((row,i)=>{
       row.no = i+1;
       row.tanggalObj = parseTanggalIndo(row["Tanggal"]);
@@ -97,86 +93,86 @@ Papa.parse(sheetUrl, {
     renderTable();
   },
   error: function(err){
-    document.querySelector("tbody").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${err.message}</td></tr>`;
+    document.getElementById("table-body").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${err.message}</td></tr>`;
   }
 });
 
-function renderTable(){
-  const tbody = document.querySelector("tbody");
-  const pagination = document.querySelector(".pagination");
+function highlightText(text, keyword){
+  if(!keyword) return text;
+  const regex = new RegExp(`(${keyword.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')})`, 'gi');
+  return text.replace(regex,'<span class="highlight">$1</span>');
+}
 
-  const startDateVal = document.getElementById("startDate").value;
-  const endDateVal = document.getElementById("endDate").value;
-  const startDate = startDateVal ? new Date(startDateVal) : null;
-  const endDate = endDateVal ? new Date(endDateVal) : null;
-
-  filteredData = allData.filter(r=>{
-    let matchDate = true;
-    if(startDate && endDate && r.tanggalObj) matchDate = r.tanggalObj >= startDate && r.tanggalObj <= endDate;
-
-    let matchText = currentKeyword ? Object.values(r).some(v=>String(v).toLowerCase().includes(currentKeyword)) : true;
+function getFilteredData(){
+  const startDateVal=document.getElementById("startDate").value;
+  const endDateVal=document.getElementById("endDate").value;
+  const startDate=startDateVal?new Date(startDateVal):null;
+  const endDate=endDateVal?new Date(endDateVal):null;
+  return allData.filter(r=>{
+    let matchDate=true; if(startDate && endDate && r.tanggalObj) matchDate=r.tanggalObj>=startDate && r.tanggalObj<=endDate;
+    let matchText=currentKeyword?Object.values(r).some(v=>String(v).toLowerCase().includes(currentKeyword)):true;
     return matchDate && matchText;
   });
+}
 
-  const dataToShow = filteredData.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage);
-  tbody.innerHTML = "";
-
-  if(dataToShow.length === 0){
-    tbody.innerHTML = "<tr><td colspan='7'>Tidak ada data</td></tr>";
-    pagination.innerHTML = "";
-    return;
-  }
-
-  dataToShow.forEach((r,i)=>{
+function renderTable(){
+  filteredData = getFilteredData();
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML="";
+  const start = (currentPage-1)*rowsPerPage;
+  const end = start+rowsPerPage;
+  const dataToShow = filteredData.slice(start,end);
+  if(dataToShow.length===0){ tbody.innerHTML="<tr><td colspan='7'>Tidak ada data</td></tr>"; document.getElementById("pagination").innerHTML=""; return; }
+  dataToShow.forEach((row,i)=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${(currentPage-1)*rowsPerPage+i+1}</td>
-      <td>${r["Tanggal"]||""}</td>
-      <td>${r["Nama Warga"]||""}</td>
-      <td>${r["Alamat"]||""}</td>
-      <td>${r["Jenis Iuran"]||""}</td>
-      <td class="hasil">${r["Jumlah (Rp)"]||""}</td>
-      <td style="text-align:left">${r["Keterangan"]||""}</td>
+    tr.innerHTML=`
+      <td>${start+i+1}</td>
+      <td>${highlightText(row["Tanggal"]||"",currentKeyword)}</td>
+      <td>${highlightText(row["Nama Warga"]||"",currentKeyword)}</td>
+      <td>${highlightText(row["Alamat"]||"",currentKeyword)}</td>
+      <td>${highlightText(row["Jenis Iuran"]||"",currentKeyword)}</td>
+      <td class="hasil">${highlightText(row["Jumlah (Rp)"]||"",currentKeyword)}</td>
+      <td style="text-align:left">${highlightText(row["Keterangan"]||"",currentKeyword)}</td>
     `;
     tbody.appendChild(tr);
   });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  pagination.innerHTML = "";
-  if(totalPages <= 1) return;
-
-  const prev = document.createElement("button");
-  prev.textContent = "⬅️"; prev.disabled = currentPage===1; prev.onclick = ()=>{ currentPage--; renderTable(); };
-  pagination.appendChild(prev);
-
-  for(let i=1; i<=totalPages; i++){
-    const btn = document.createElement("button");
-    btn.textContent = i; if(i===currentPage) btn.classList.add("active");
-    btn.onclick = ()=>{ currentPage=i; renderTable(); };
-    pagination.appendChild(btn);
-  }
-
-  const next = document.createElement("button");
-  next.textContent = "➡️"; next.disabled = currentPage===totalPages; next.onclick = ()=>{ currentPage++; renderTable(); };
-  pagination.appendChild(next);
+  renderPagination();
 }
 
-function applyFilter(){ currentKeyword=document.getElementById("searchBox").value.toLowerCase(); currentPage=1; renderTable(); }
-function resetFilter(){ document.getElementById("searchBox").value=""; document.getElementById("startDate").value=""; document.getElementById("endDate").value=""; currentKeyword=""; currentPage=1; renderTable(); }
+function renderPagination(){
+  const pagination=document.getElementById("pagination");
+  pagination.innerHTML="";
+  const totalPages=Math.ceil(filteredData.length/rowsPerPage);
+  if(totalPages<=1) return;
+  const prev=document.createElement("button"); prev.textContent="⬅️"; prev.disabled=currentPage===1; prev.onclick=()=>{currentPage--; renderTable();}; pagination.appendChild(prev);
+  for(let i=1;i<=totalPages;i++){ const b=document.createElement("button"); b.textContent=i; if(i===currentPage) b.classList.add("active"); b.onclick=()=>{currentPage=i; renderTable();}; pagination.appendChild(b);}
+  const next=document.createElement("button"); next.textContent="➡️"; next.disabled=currentPage===totalPages; next.onclick=()=>{currentPage++; renderTable();}; pagination.appendChild(next);
+}
 
-function exportPDF(){
-  import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(jsPDFModule=>{
-    const { jsPDF } = jsPDFModule;
-    const doc = new jsPDF(); let y=10; doc.setFontSize(10);
-    doc.text(`Warga Bulanan RT 04 RW 01`,10,y); y+=8;
-    filteredData.forEach(r=>{
-      const line = `${r.no} | ${r["Tanggal"]||""} | ${r["Nama Warga"]||""} | ${r["Alamat"]||""} | ${r["Jenis Iuran"]||""} | ${r["Jumlah (Rp)"]||""} | ${r["Keterangan"]||""}`;
-      if(y>280){ doc.addPage(); y=10; }
-      doc.text(line,10,y); y+=6;
-    });
-    doc.save("Warga_Bulanan.pdf");
+document.getElementById("searchBox").addEventListener("input",()=>{currentKeyword=document.getElementById("searchBox").value.toLowerCase(); currentPage=1; renderTable();});
+document.getElementById("startDate").addEventListener("change",()=>{currentPage=1; renderTable();});
+document.getElementById("endDate").addEventListener("change",()=>{currentPage=1; renderTable();});
+
+function resetFilter(){ document.getElementById("searchBox").value=""; document.getElementById("startDate").value=""; document.getElementById("endDate").value=""; currentKeyword=""; currentPage=1; filteredData=allData; renderTable(); }
+
+async function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l','pt','a4');
+  doc.setFontSize(10); let y=20;
+  doc.text("LAPORAN WARGA BULANAN RT 04 RW 01",40,y); y+=20;
+  const headers=["No","Tanggal","Nama Warga","Alamat","Jenis Iuran","Jumlah (Rp)","Keterangan"];
+  let startX=40; headers.forEach((h,i)=>{ doc.text(h,startX+i*90,y); }); y+=15;
+  filteredData.forEach((r,i)=>{
+    const rowY=y+i*15;
+    doc.text(String(i+1),startX,rowY);
+    doc.text(r["Tanggal"]||"",startX+90,rowY);
+    doc.text(r["Nama Warga"]||"",startX+180,rowY);
+    doc.text(r["Alamat"]||"",startX+270,rowY);
+    doc.text(r["Jenis Iuran"]||"",startX+360,rowY);
+    doc.text(r["Jumlah (Rp)"]||"",startX+450,rowY);
+    doc.text(r["Keterangan"]||"",startX+540,rowY);
   });
+  doc.save("Warga_Bulanan.pdf");
 }
 </script>
 </body>
