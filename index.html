@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</title>
+<title>Warga Bulanan RT 04 RW 01</title>
 <style>
 body { font-family:'Segoe UI',sans-serif; background:#0f0f0f; color:#f1f1f1; margin:0; padding:10px; }
 h1 { text-align:center; color:#00ff88; margin-bottom:10px; font-size:1.2rem; }
@@ -32,7 +32,7 @@ footer{ text-align:center; font-size:11px; color:#777; margin-top:15px; }
 </head>
 <body>
 
-<h1>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</h1>
+<h1>Warga Bulanan RT 04 RW 01</h1>
 
 <div class="filter-container">
   <label>Dari: <input type="date" id="startDate"></label>
@@ -64,26 +64,32 @@ footer{ text-align:center; font-size:11px; color:#777; margin-top:15px; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// Link CSV publik yang sudah publish to web
+// CSV publik yang sudah Publish to Web
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
 
-let allData = [], filteredData = [], currentPage=1, rowsPerPage=10, currentKeyword="";
+let allData = [], filteredData = [], currentPage = 1, rowsPerPage = 10, currentKeyword = "";
 
 async function fetchSheet(){
-  try{
+  try {
     const res = await fetch(sheetUrl);
     const text = await res.text();
-    const rows = text.split("\n").filter(r=>r.trim()!="").map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-    const headers = rows[0].map(h=>h.replace(/"/g,"").trim());
+
+    // Pisahkan baris CSV, regex aman untuk koma dalam tanda kutip
+    const rows = text.split("\n").filter(r=>r.trim()!="")
+                     .map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+
+    const headers = rows[0].map(h => h.replace(/"/g,"").trim());
+
     allData = rows.slice(1).map((r,i)=>{
-      const obj={no:i+1};
+      const obj = {no:i+1};
       headers.forEach((h,j)=>obj[h]=r[j]?r[j].replace(/"/g,""):"");
-      if(obj["Tanggal"]) obj["tanggalObj"]=new Date(obj["Tanggal"]);
+      if(obj["Tanggal"]) obj["tanggalObj"] = new Date(obj["Tanggal"]);
       return obj;
     }).reverse();
+
     filteredData = allData;
     renderTable();
-  }catch(e){
+  } catch(e) {
     document.querySelector("tbody").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${e.message}</td></tr>`;
   }
 }
@@ -91,25 +97,32 @@ async function fetchSheet(){
 function renderTable(){
   const tbody = document.querySelector("tbody");
   const pagination = document.querySelector(".pagination");
-  const startDateVal=document.getElementById("startDate").value;
-  const endDateVal=document.getElementById("endDate").value;
-  const startDate=startDateVal?new Date(startDateVal):null;
-  const endDate=endDateVal?new Date(endDateVal):null;
+
+  const startDateVal = document.getElementById("startDate").value;
+  const endDateVal = document.getElementById("endDate").value;
+  const startDate = startDateVal ? new Date(startDateVal) : null;
+  const endDate = endDateVal ? new Date(endDateVal) : null;
 
   filteredData = allData.filter(r=>{
-    let matchDate=true;
-    if(startDate && endDate && r.tanggalObj) matchDate=r.tanggalObj>=startDate && r.tanggalObj<=endDate;
-    let matchText=currentKeyword?Object.values(r).some(v=>String(v).toLowerCase().includes(currentKeyword)):true;
+    let matchDate = true;
+    if(startDate && endDate && r.tanggalObj) matchDate = r.tanggalObj >= startDate && r.tanggalObj <= endDate;
+
+    let matchText = currentKeyword ? Object.values(r).some(v=>String(v).toLowerCase().includes(currentKeyword)) : true;
     return matchDate && matchText;
   });
 
-  const dataToShow = filteredData.slice((currentPage-1)*rowsPerPage,currentPage*rowsPerPage);
-  tbody.innerHTML="";
-  if(dataToShow.length===0){ tbody.innerHTML="<tr><td colspan='7'>Tidak ada data</td></tr>"; pagination.innerHTML=""; return; }
+  const dataToShow = filteredData.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage);
+  tbody.innerHTML = "";
+
+  if(dataToShow.length === 0){
+    tbody.innerHTML = "<tr><td colspan='7'>Tidak ada data</td></tr>";
+    pagination.innerHTML = "";
+    return;
+  }
 
   dataToShow.forEach((r,i)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
       <td>${(currentPage-1)*rowsPerPage+i+1}</td>
       <td>${r["Tanggal"]||""}</td>
       <td>${r["Nama Warga"]||""}</td>
@@ -121,23 +134,24 @@ function renderTable(){
     tbody.appendChild(tr);
   });
 
-  const totalPages=Math.ceil(filteredData.length/rowsPerPage);
-  pagination.innerHTML="";
-  if(totalPages<=1) return;
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  pagination.innerHTML = "";
+  if(totalPages <= 1) return;
 
-  const prev=document.createElement("button");
-  prev.textContent="⬅️"; prev.disabled=currentPage===1; prev.onclick=()=>{currentPage--; renderTable();};
+  const prev = document.createElement("button");
+  prev.textContent = "⬅️"; prev.disabled = currentPage===1; prev.onclick = ()=>{ currentPage--; renderTable(); };
   pagination.appendChild(prev);
 
-  for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement("button");
-    btn.textContent=i; if(i===currentPage) btn.classList.add("active");
-    btn.onclick=()=>{currentPage=i; renderTable();};
+  for(let i=1; i<=totalPages; i++){
+    const btn = document.createElement("button");
+    btn.textContent = i; if(i===currentPage) btn.classList.add("active");
+    btn.onclick = ()=>{ currentPage=i; renderTable(); };
     pagination.appendChild(btn);
   }
 
-  const next=document.createElement("button");
-  next.textContent="➡️"; next.disabled=currentPage===totalPages; next.onclick=()=>{currentPage++; renderTable();};
+  const next = document.createElement("button");
+  next.textContent = "➡️"; next.disabled = currentPage===totalPages; next.onclick = ()=>{ currentPage++; renderTable(); };
   pagination.appendChild(next);
 }
 
@@ -146,11 +160,11 @@ function resetFilter(){ document.getElementById("searchBox").value=""; document.
 
 function exportPDF(){
   import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(jsPDFModule=>{
-    const { jsPDF }=jsPDFModule;
-    const doc=new jsPDF(); let y=10; doc.setFontSize(10);
+    const { jsPDF } = jsPDFModule;
+    const doc = new jsPDF(); let y=10; doc.setFontSize(10);
     doc.text(`Warga Bulanan RT 04 RW 01`,10,y); y+=8;
     filteredData.forEach(r=>{
-      const line=`${r.no} | ${r["Tanggal"]||""} | ${r["Nama Warga"]||""} | ${r["Alamat"]||""} | ${r["Jenis Iuran"]||""} | ${r["Jumlah (Rp)"]||""} | ${r["Keterangan"]||""}`;
+      const line = `${r.no} | ${r["Tanggal"]||""} | ${r["Nama Warga"]||""} | ${r["Alamat"]||""} | ${r["Jenis Iuran"]||""} | ${r["Jumlah (Rp)"]||""} | ${r["Keterangan"]||""}`;
       if(y>280){ doc.addPage(); y=10; }
       doc.text(line,10,y); y+=6;
     });
