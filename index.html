@@ -63,7 +63,7 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
 const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
-let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="";
+let allData=[], filteredData=[], currentPage=1, rowsPerPage=2, currentKeyword="";
 
 function parseTanggal(tglStr){
   if(!tglStr) return null;
