@@ -62,51 +62,44 @@ footer{ text-align:center; font-size:11px; color:#777; margin-top:15px; }
 
 <footer>Data otomatis diperbarui dari Google Sheet</footer>
 
+<!-- Library PapaParse -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// CSV publik yang sudah Publish to Web
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
 
 let allData = [], filteredData = [], currentPage = 1, rowsPerPage = 10, currentKeyword = "";
 
-// parsing tanggal bahasa Indonesia seperti "Selasa, 14 Oktober 2025"
 function parseTanggalIndo(tglStr){
   if(!tglStr) return null;
-  const parts = tglStr.split(",")[1]?.trim().split(" "); // ["14","Oktober","2025"]
-  if(!parts || parts.length !== 3) return null;
+  const parts = tglStr.split(",")[1]?.trim().split(" ");
+  if(!parts || parts.length!==3) return null;
   const day = parseInt(parts[0]);
-  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni",
-                      "Juli","Agustus","September","Oktober","November","Desember"];
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
   const month = monthNames.indexOf(parts[1]);
   const year = parseInt(parts[2]);
   if(month===-1 || isNaN(day) || isNaN(year)) return null;
   return new Date(year, month, day);
 }
 
-async function fetchSheet(){
-  try {
-    const res = await fetch(sheetUrl);
-    const text = await res.text();
-
-    // Pisahkan baris CSV, regex aman untuk koma dalam tanda kutip
-    const rows = text.split("\n").filter(r=>r.trim()!="")
-                     .map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-
-    const headers = rows[0].map(h => h.replace(/"/g,"").trim());
-
-    allData = rows.slice(1).map((r,i)=>{
-      const obj = {no:i+1};
-      headers.forEach((h,j)=>obj[h]=r[j]?r[j].replace(/"/g,""):"");
-      if(obj["Tanggal"]) obj["tanggalObj"] = parseTanggalIndo(obj["Tanggal"]);
-      return obj;
+// Load CSV dengan PapaParse
+Papa.parse(sheetUrl, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    allData = results.data.map((row,i)=>{
+      row.no = i+1;
+      row.tanggalObj = parseTanggalIndo(row["Tanggal"]);
+      return row;
     }).reverse();
-
     filteredData = allData;
     renderTable();
-  } catch(e) {
-    document.querySelector("tbody").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${e.message}</td></tr>`;
+  },
+  error: function(err){
+    document.querySelector("tbody").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${err.message}</td></tr>`;
   }
-}
+});
 
 function renderTable(){
   const tbody = document.querySelector("tbody");
@@ -185,8 +178,6 @@ function exportPDF(){
     doc.save("Warga_Bulanan.pdf");
   });
 }
-
-fetchSheet();
 </script>
 </body>
 </html>
