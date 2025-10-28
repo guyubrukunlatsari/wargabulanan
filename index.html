@@ -67,9 +67,14 @@ let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="
 
 function parseTanggal(tglStr){
   if(!tglStr) return null;
-  tglStr = tglStr.replace(/^\w+,\s*/,""); // hilangkan nama hari
+  tglStr = tglStr.replace(/^\w+,\s*/, ""); // hilangkan nama hari
   const m = tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
-  if(m){ const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]); if(month!==-1) return new Date(year,month,day);}
+  if(m){
+    const day=parseInt(m[1],10);
+    const month=monthNames.indexOf(m[2]);
+    const year=parseInt(m[3],10);
+    if(month!==-1) return new Date(year, month, day);
+  }
   return null;
 }
 
@@ -83,6 +88,7 @@ function loadData(){
   Papa.parse(sheetURL,{
     download:true,
     header:true,
+    skipEmptyLines:true,
     complete:function(results){
       allData = results.data.map((r,i)=>{
         const t=parseTanggal(r["TANGGAL"]);
