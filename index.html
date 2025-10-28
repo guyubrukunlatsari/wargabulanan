@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</title>
+<title>LAPORAN WARGA BULANAN RT 04 RW 01</title>
 <style>
 body { font-family:'Segoe UI',sans-serif; background:#0f0f0f; color:#f1f1f1; margin:0; padding:15px;}
 h1 {text-align:center; color:#00ff88; margin-bottom:15px;}
@@ -28,14 +28,13 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 </style>
 </head>
 <body>
-<h1>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</h1>
+<h1>LAPORAN WARGA BULANAN RT 04 RW 01</h1>
 
 <div class="filter-container">
 <input type="text" id="searchBox" placeholder="🔎 Cari semua kolom..." />
 <label>Dari: <input type="date" id="startDate"></label>
 <label>Sampai: <input type="date" id="endDate"></label>
 <button onclick="resetFilter()">🔄 Reset</button>
-<button onclick="exportPDF()">📄 Export PDF</button>
 </div>
 
 <div class="table-wrapper">
@@ -48,31 +47,29 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 <th>Periode Bayar</th>
 <th>Nominal (Rp)</th>
 <th>Keterangan</th>
+<th>Foto</th>
 </tr>
 </thead>
-<tbody id="table-body"><tr><td colspan="6">⏳ Memuat data...</td></tr></tbody>
+<tbody id="table-body"><tr><td colspan="7">⏳ Memuat data...</td></tr></tbody>
 </table>
 </div>
 
 <div class="pagination" id="pagination"></div>
 <footer>Data otomatis diperbarui dari Google Sheet</footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
-const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
+
 const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 let allData=[], filteredData=[], currentPage=1, rowsPerPage=2, currentKeyword="";
 
 function parseTanggal(tglStr){
   if(!tglStr) return null;
-  tglStr = tglStr.replace(/^\w+,\s*/,""); // hilangkan nama hari
+  tglStr = tglStr.replace(/^\w+,\s*/,""); // hapus nama hari
   const m = tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
-  if(m){
-    const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]);
-    if(month!==-1) return new Date(year,month,day);
-  }
+  if(m){ const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]); if(month!==-1) return new Date(year,month,day);}
   return null;
 }
 
@@ -86,7 +83,6 @@ function loadData(){
   Papa.parse(sheetURL,{
     download:true,
     header:true,
-    skipEmptyLines:true,
     complete:function(results){
       allData = results.data.map((r,i)=>{
         const t=parseTanggal(r["TANGGAL"]);
@@ -97,15 +93,14 @@ function loadData(){
           nama:r["NAMA WARGA"]||"",
           periode:r["PERIODE BAYAR"]||"",
           jumlah:r["NOMINAL (Rp)"]||"",
-          ket:r["KETERANGAN"]||""
+          ket:r["KETERANGAN"]||"",
+          foto:r["FOTO"]||""
         };
       }).filter(r=>r.tanggalText!=="");
       filteredData = allData;
       renderTable();
     },
-    error:function(err){
-      document.getElementById("table-body").innerHTML=`<tr><td colspan="6">❌ Gagal memuat data: ${err.message}</td></tr>`;
-    }
+    error:function(err){ document.getElementById("table-body").innerHTML=`<tr><td colspan="7">❌ Gagal memuat data: ${err.message}</td></tr>`; }
   });
 }
 
@@ -127,15 +122,16 @@ function renderTable(){
   const tbody=document.getElementById("table-body"); tbody.innerHTML="";
   const start=(currentPage-1)*rowsPerPage; const end=start+rowsPerPage;
   const dataToShow=filteredData.slice(start,end);
-  if(dataToShow.length===0){ tbody.innerHTML=`<tr><td colspan="6">Tidak ada data</td></tr>`; document.getElementById("pagination").innerHTML=""; return; }
+  if(dataToShow.length===0){ tbody.innerHTML=`<tr><td colspan="7">Tidak ada data</td></tr>`; document.getElementById("pagination").innerHTML=""; return; }
   dataToShow.forEach((r,i)=>{
     const tr=document.createElement("tr");
     tr.innerHTML=`<td>${start+i+1}</td>
-    <td>${highlightText(r.tanggalText,currentKeyword)}</td>
-    <td>${highlightText(r.nama,currentKeyword)}</td>
-    <td>${highlightText(r.periode,currentKeyword)}</td>
-    <td class="hasil">${highlightText(r.jumlah,currentKeyword)}</td>
-    <td style="text-align:left">${highlightText(r.ket,currentKeyword)}</td>`;
+      <td>${highlightText(r.tanggalText,currentKeyword)}</td>
+      <td>${highlightText(r.nama,currentKeyword)}</td>
+      <td>${highlightText(r.periode,currentKeyword)}</td>
+      <td class="hasil">${highlightText(r.jumlah,currentKeyword)}</td>
+      <td style="text-align:left">${highlightText(r.ket,currentKeyword)}</td>
+      <td>${r.foto}</td>`;
     tbody.appendChild(tr);
   });
   renderPagination();
@@ -153,27 +149,7 @@ function renderPagination(){
 document.getElementById("searchBox").addEventListener("input",()=>{ currentKeyword=document.getElementById("searchBox").value.toLowerCase(); currentPage=1; renderTable(); });
 document.getElementById("startDate").addEventListener("change",()=>{currentPage=1; renderTable();});
 document.getElementById("endDate").addEventListener("change",()=>{currentPage=1; renderTable();});
-
 function resetFilter(){ document.getElementById("searchBox").value=""; document.getElementById("startDate").value=""; document.getElementById("endDate").value=""; currentKeyword=""; filteredData=allData; currentPage=1; renderTable(); }
-
-async function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l','pt','a4'); doc.setFontSize(10);
-  let y=20;
-  doc.text("LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI",40,y); y+=20;
-  const headers=["No","Tanggal","Nama Warga","Periode Bayar","Nominal (Rp)","Keterangan"];
-  let startX=40; headers.forEach((h,i)=>doc.text(h,startX+i*100,y)); y+=15;
-  filteredData.forEach((r,i)=>{
-    const rowY=y+i*15;
-    doc.text(String(i+1),startX,rowY);
-    doc.text(r.tanggalText,startX+100,rowY);
-    doc.text(r.nama,startX+200,rowY);
-    doc.text(r.periode,startX+300,rowY);
-    doc.text(String(r.jumlah),startX+400,rowY);
-    doc.text(r.ket,startX+500,rowY);
-  });
-  doc.save("Laporan_Warga_Bulanan.pdf");
-}
 
 loadData();
 </script>
