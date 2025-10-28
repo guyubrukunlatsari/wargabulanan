@@ -16,7 +16,6 @@ table { width:100%; border-collapse:collapse; background:#1a1a1a; min-width:750p
 th,td { padding:8px 10px; text-align:center; border-bottom:1px solid #333; font-size:0.85rem;}
 th { background:#00cc66; color:#000;}
 td.hasil { text-align:right; color:#00ff99; font-weight:bold; min-width:150px;}
-th:nth-child(7){ min-width:150px;}
 tr:nth-child(even){ background:#1e1e1e;}
 tr:hover { background:#2a2a2a;}
 .highlight { background:#00ff44; color:#000; font-weight:bold; border-radius:3px; padding:0 2px;}
@@ -45,9 +44,9 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 <tr>
 <th>No</th>
 <th>Tanggal</th>
-<th>Nama</th>
-<th>Alamat</th>
-<th>Jumlah</th>
+<th>Nama Warga</th>
+<th>Periode Bayar</th>
+<th>Nominal (Rp)</th>
 <th>Keterangan</th>
 </tr>
 </thead>
@@ -64,18 +63,13 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
 
 let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="";
-
-// Mapping bulan bahasa Indonesia
 const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 function parseTanggal(tglStr){
   if(!tglStr) return null;
-  tglStr= tglStr.replace(/^\w+,\s*/,""); // hapus nama hari
+  tglStr= tglStr.replace(/^\w+,\s*/,""); 
   const m=tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
-  if(m){
-    const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]);
-    if(month!==-1) return new Date(year,month,day);
-  }
+  if(m){ const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]); if(month!==-1) return new Date(year,month,day);}
   return null;
 }
 
@@ -87,15 +81,15 @@ function loadData(){
     header:true,
     complete:function(results){
       allData=results.data.map((r,i)=>{
-        const t=parseTanggal(r["Tanggal"]);
+        const t=parseTanggal(r["TANGGAL"]);
         return {
           no:i+1,
-          tanggalText:r["Tanggal"]||"",
+          tanggalText:r["TANGGAL"]||"",
           tanggalObj:t,
-          nama:r["Nama"]||"",
-          alamat:r["Alamat"]||"",
-          jumlah:r["Jumlah"]||"",
-          ket:r["Keterangan"]||""
+          nama:r["NAMA WARGA"]||"",
+          periode:r["PERIODE BAYAR"]||"",
+          jumlah:r["NOMINAL (Rp)"]||"",
+          ket:r["KETERANGAN"]||""
         };
       }).filter(r=>r.tanggalText!=="");
       filteredData=allData;
@@ -131,8 +125,8 @@ function renderTable(){
     tr.innerHTML=`<td>${start+i+1}</td>
     <td>${highlightText(r.tanggalText,currentKeyword)}</td>
     <td>${highlightText(r.nama,currentKeyword)}</td>
-    <td>${highlightText(r.alamat,currentKeyword)}</td>
-    <td>${highlightText(r.jumlah,currentKeyword)}</td>
+    <td>${highlightText(r.periode,currentKeyword)}</td>
+    <td class="hasil">${highlightText(r.jumlah,currentKeyword)}</td>
     <td style="text-align:left">${highlightText(r.ket,currentKeyword)}</td>`;
     tbody.appendChild(tr);
   });
@@ -158,16 +152,17 @@ async function exportPDF(){
   const { jsPDF }=window.jspdf; const doc=new jsPDF('l','pt','a4'); doc.setFontSize(10);
   doc.text("Laporan Warga Bulanan RT 04 RW 01 LATSARI",40,20);
   let y=40; const startX=40;
-  const headers=["No","Tanggal","Nama","Alamat","Jumlah","Keterangan"];
-  headers.forEach((h,i)=>{doc.text(h,startX+i*80,y);}); y+=15;
+  const headers=["No","Tanggal","Nama Warga","Periode Bayar","Nominal (Rp)","Keterangan"];
+  headers.forEach((h,i)=>{doc.text(h,startX+i*100, y);});
+  y+=15;
   filteredData.forEach((r,i)=>{
     const rowY=y+i*15;
     doc.text(String(i+1),startX,rowY);
-    doc.text(r.tanggalText,startX+80,rowY);
-    doc.text(r.nama,startX+160,rowY);
-    doc.text(r.alamat,startX+240,rowY);
-    doc.text(String(r.jumlah),startX+320,rowY);
-    doc.text(r.ket,startX+400,rowY);
+    doc.text(r.tanggalText,startX+100,rowY);
+    doc.text(r.nama,startX+200,rowY);
+    doc.text(r.periode,startX+300,rowY);
+    doc.text(String(r.jumlah),startX+400,rowY);
+    doc.text(r.ket,startX+500,rowY);
   });
   doc.save("Laporan_Warga_Bulanan.pdf");
 }
