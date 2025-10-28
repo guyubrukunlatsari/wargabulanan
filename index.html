@@ -65,9 +65,10 @@ const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agus
 
 let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="";
 
+// Parsing tanggal dari format "Selasa, 14 Oktober 2025" ke Date object
 function parseTanggal(tglStr){
   if(!tglStr) return null;
-  tglStr = tglStr.replace(/^\w+,\s*/,""); // hilangkan nama hari
+  tglStr = tglStr.replace(/^\w+,\s*/,""); // hapus nama hari
   const m = tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
   if(m){ 
     const day=parseInt(m[1],10);
@@ -84,10 +85,12 @@ function highlightText(text, keyword){
   return text.replace(regex,'<span class="highlight">$1</span>');
 }
 
+// Load data CSV dari Google Sheet
 function loadData(){
   Papa.parse(sheetURL,{
     download:true,
     header:true,
+    skipEmptyLines:true,
     complete:function(results){
       allData = results.data.map((r,i)=>{
         const t=parseTanggal(r["TANGGAL"]);
@@ -126,9 +129,14 @@ function getFilteredData(){
 function renderTable(){
   filteredData=getFilteredData();
   const tbody=document.getElementById("table-body"); tbody.innerHTML="";
-  const start=(currentPage-1)*rowsPerPage; const end=start+rowsPerPage;
+  const start=(currentPage-1)*rowsPerPage; 
+  const end=start+rowsPerPage;
   const dataToShow=filteredData.slice(start,end);
-  if(dataToShow.length===0){ tbody.innerHTML=`<tr><td colspan="6">Tidak ada data</td></tr>`; document.getElementById("pagination").innerHTML=""; return; }
+  if(dataToShow.length===0){ 
+    tbody.innerHTML=`<tr><td colspan="6">Tidak ada data</td></tr>`; 
+    document.getElementById("pagination").innerHTML=""; 
+    return; 
+  }
   dataToShow.forEach((r,i)=>{
     const tr=document.createElement("tr");
     tr.innerHTML=`<td>${start+i+1}</td>
@@ -143,7 +151,8 @@ function renderTable(){
 }
 
 function renderPagination(){
-  const pagination=document.getElementById("pagination"); pagination.innerHTML="";
+  const pagination=document.getElementById("pagination"); 
+  pagination.innerHTML="";
   const totalPages=Math.ceil(filteredData.length/rowsPerPage);
   if(totalPages<=1) return;
   const prev=document.createElement("button"); prev.textContent="⬅️"; prev.disabled=currentPage===1; prev.onclick=()=>{currentPage--; renderTable();}; pagination.appendChild(prev);
@@ -151,15 +160,29 @@ function renderPagination(){
   const next=document.createElement("button"); next.textContent="➡️"; next.disabled=currentPage===totalPages; next.onclick=()=>{currentPage++; renderTable();}; pagination.appendChild(next);
 }
 
-document.getElementById("searchBox").addEventListener("input",()=>{ currentKeyword=document.getElementById("searchBox").value.toLowerCase(); currentPage=1; renderTable(); });
+document.getElementById("searchBox").addEventListener("input",()=>{ 
+  currentKeyword=document.getElementById("searchBox").value.toLowerCase(); 
+  currentPage=1; 
+  renderTable(); 
+});
 document.getElementById("startDate").addEventListener("change",()=>{currentPage=1; renderTable();});
 document.getElementById("endDate").addEventListener("change",()=>{currentPage=1; renderTable();});
 
-function resetFilter(){ document.getElementById("searchBox").value=""; document.getElementById("startDate").value=""; document.getElementById("endDate").value=""; currentKeyword=""; filteredData=allData; currentPage=1; renderTable(); }
+function resetFilter(){ 
+  document.getElementById("searchBox").value=""; 
+  document.getElementById("startDate").value=""; 
+  document.getElementById("endDate").value=""; 
+  currentKeyword=""; 
+  filteredData=allData; 
+  currentPage=1; 
+  renderTable(); 
+}
 
+// Export PDF
 async function exportPDF(){
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l','pt','a4'); doc.setFontSize(10);
+  const doc = new jsPDF('l','pt','a4'); 
+  doc.setFontSize(10);
   let y=20;
   doc.text("LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI",40,y); y+=20;
   const headers=["No","Tanggal","Nama Warga","Periode Bayar","Nominal (Rp)","Keterangan"];
