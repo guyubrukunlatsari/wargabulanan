@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Warga Bulanan RT 04 RW 01 LATSARI</title>
+<title>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</title>
 <style>
 body { font-family:'Segoe UI',sans-serif; background:#0f0f0f; color:#f1f1f1; margin:0; padding:15px;}
 h1 {text-align:center; color:#00ff88; margin-bottom:15px;}
@@ -12,7 +12,7 @@ h1 {text-align:center; color:#00ff88; margin-bottom:15px;}
 .filter-container button { background:#00cc66; color:#000; font-weight:bold; cursor:pointer;}
 .filter-container button:hover { background:#00ff88;}
 .table-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch;}
-table { width:100%; border-collapse:collapse; background:#1a1a1a; min-width:750px;}
+table { width:100%; border-collapse:collapse; background:#1a1a1a; min-width:700px;}
 th,td { padding:8px 10px; text-align:center; border-bottom:1px solid #333; font-size:0.85rem;}
 th { background:#00cc66; color:#000;}
 td.hasil { text-align:right; color:#00ff99; font-weight:bold; min-width:150px;}
@@ -28,7 +28,7 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 </style>
 </head>
 <body>
-<h1>Laporan Warga Bulanan RT 04 RW 01 LATSARI</h1>
+<h1>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</h1>
 
 <div class="filter-container">
 <input type="text" id="searchBox" placeholder="🔎 Cari semua kolom..." />
@@ -61,26 +61,30 @@ footer { text-align:center; font-size:12px; color:#777; margin-top:20px;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-eGvY4RH3dsV2hT7D4bvD-MohbrKWuVN1P5w7jUWtLoG1dw5Yf6ddboiZAPzY6wlYce/pub?gid=2060081132&single=true&output=csv";
+const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 let allData=[], filteredData=[], currentPage=1, rowsPerPage=10, currentKeyword="";
-const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 function parseTanggal(tglStr){
   if(!tglStr) return null;
-  tglStr= tglStr.replace(/^\w+,\s*/,""); 
-  const m=tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
+  tglStr = tglStr.replace(/^\w+,\s*/,""); // hilangkan nama hari
+  const m = tglStr.match(/(\d{1,2}) (\w+) (\d{4})/);
   if(m){ const day=parseInt(m[1]), month=monthNames.indexOf(m[2]), year=parseInt(m[3]); if(month!==-1) return new Date(year,month,day);}
   return null;
 }
 
-function highlightText(text, keyword){ if(!keyword) return text; const regex=new RegExp(`(${keyword.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')})`,'gi'); return text.replace(regex,'<span class="highlight">$1</span>'); }
+function highlightText(text, keyword){
+  if(!keyword) return text;
+  const regex=new RegExp(`(${keyword.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')})`,'gi');
+  return text.replace(regex,'<span class="highlight">$1</span>');
+}
 
 function loadData(){
   Papa.parse(sheetURL,{
     download:true,
     header:true,
     complete:function(results){
-      allData=results.data.map((r,i)=>{
+      allData = results.data.map((r,i)=>{
         const t=parseTanggal(r["TANGGAL"]);
         return {
           no:i+1,
@@ -92,7 +96,7 @@ function loadData(){
           ket:r["KETERANGAN"]||""
         };
       }).filter(r=>r.tanggalText!=="");
-      filteredData=allData;
+      filteredData = allData;
       renderTable();
     },
     error:function(err){
@@ -149,12 +153,12 @@ document.getElementById("endDate").addEventListener("change",()=>{currentPage=1;
 function resetFilter(){ document.getElementById("searchBox").value=""; document.getElementById("startDate").value=""; document.getElementById("endDate").value=""; currentKeyword=""; filteredData=allData; currentPage=1; renderTable(); }
 
 async function exportPDF(){
-  const { jsPDF }=window.jspdf; const doc=new jsPDF('l','pt','a4'); doc.setFontSize(10);
-  doc.text("Laporan Warga Bulanan RT 04 RW 01 LATSARI",40,20);
-  let y=40; const startX=40;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l','pt','a4'); doc.setFontSize(10);
+  let y=20;
+  doc.text("LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI",40,y); y+=20;
   const headers=["No","Tanggal","Nama Warga","Periode Bayar","Nominal (Rp)","Keterangan"];
-  headers.forEach((h,i)=>{doc.text(h,startX+i*100, y);});
-  y+=15;
+  let startX=40; headers.forEach((h,i)=>doc.text(h,startX+i*100,y)); y+=15;
   filteredData.forEach((r,i)=>{
     const rowY=y+i*15;
     doc.text(String(i+1),startX,rowY);
