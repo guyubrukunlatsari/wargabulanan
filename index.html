@@ -117,7 +117,7 @@ function getFilteredData(){
   const endDate=endDateVal?new Date(endDateVal):null;
   return allData.filter(r=>{
     let matchDate=true;
-    if(startDate && endDate) matchDate=r.tanggalObj ? (r.tanggalObj>=startDate && r.tanggalObj<=endDate) : true;
+    if(startDate && endDate && r.tanggalObj) matchDate=r.tanggalObj>=startDate && r.tanggalObj<=endDate;
     let matchText=currentKeyword?Object.values(r).some(v=>String(v).toLowerCase().includes(currentKeyword)):true;
     return matchDate && matchText;
   });
