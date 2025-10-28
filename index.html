@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAPORAN WARGA BULANAN RT 04 RW 01 LATSARI</title>
+<title>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; background-color: #0f0f0f; color: #f1f1f1; margin: 0; padding: 15px; }
   h1 { text-align: center; color: #00ff88; margin-bottom: 15px; font-size: 1.5rem; }
@@ -43,7 +43,7 @@
 </style>
 </head>
 <body>
-<h1>LAPORAN WARGA BULANAN RT 04 RW 01 LATSARI</h1>
+<h1>LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI</h1>
 
 <div class="filter-container">
   <label>Dari: <input type="date" id="startDate"></label>
@@ -190,7 +190,7 @@ function exportPDF(){
   const { jsPDF }=window.jspdf;
   const doc=new jsPDF('l','pt','a4');
   doc.setFontSize(12); 
-  doc.text("LAPORAN WARGA BULANAN RT 04 RW 01 LATSARI",40,20);
+  doc.text("LAPORAN JIMPITAN WARGA BULANAN RT 04 RW 01 LATSARI",40,20);
   doc.autoTable({
     head:[["NO","TANGGAL","NAMA WARGA","PERIODE BAYAR","NOMINAL (Rp)","KETERANGAN","FOTO"]],
     body:filteredData.map((row,i)=>[
