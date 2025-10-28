@@ -69,6 +69,20 @@ const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFzjNwESJhj-e
 
 let allData = [], filteredData = [], currentPage = 1, rowsPerPage = 10, currentKeyword = "";
 
+// parsing tanggal bahasa Indonesia seperti "Selasa, 14 Oktober 2025"
+function parseTanggalIndo(tglStr){
+  if(!tglStr) return null;
+  const parts = tglStr.split(",")[1]?.trim().split(" "); // ["14","Oktober","2025"]
+  if(!parts || parts.length !== 3) return null;
+  const day = parseInt(parts[0]);
+  const monthNames = ["Januari","Februari","Maret","April","Mei","Juni",
+                      "Juli","Agustus","September","Oktober","November","Desember"];
+  const month = monthNames.indexOf(parts[1]);
+  const year = parseInt(parts[2]);
+  if(month===-1 || isNaN(day) || isNaN(year)) return null;
+  return new Date(year, month, day);
+}
+
 async function fetchSheet(){
   try {
     const res = await fetch(sheetUrl);
@@ -83,7 +97,7 @@ async function fetchSheet(){
     allData = rows.slice(1).map((r,i)=>{
       const obj = {no:i+1};
       headers.forEach((h,j)=>obj[h]=r[j]?r[j].replace(/"/g,""):"");
-      if(obj["Tanggal"]) obj["tanggalObj"] = new Date(obj["Tanggal"]);
+      if(obj["Tanggal"]) obj["tanggalObj"] = parseTanggalIndo(obj["Tanggal"]);
       return obj;
     }).reverse();
 
